@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class FatCorpse : MonoBehaviour
 {
-    [Range(0, 1500)] [SerializeField] private float m_FatCorpseForce = 1000f;      // the jump force the fat corpse applies
-    [Range(0, 1000)] [SerializeField] private int m_TimeoutMS = 100;                // the timeout before the collision can fire again in ms
+    [Range(0, 30)] [SerializeField] private float m_FatCorpseForce = 20f;       // the jump force the fat corpse applies
+    [Range(0, 1000)] [SerializeField] private int m_TimeoutMS = 100;            // the timeout before the collision can fire again in ms
 
     private float m_NextTime = 0;
 
@@ -31,7 +31,7 @@ public class FatCorpse : MonoBehaviour
         collision.otherCollider.GetContacts(contacts);
         Vector3 surfaceNormal = contacts[0].normal;
 
-        rb.AddForce(surfaceNormal * -1 * m_FatCorpseForce);
+        rb.AddForce(surfaceNormal * -1 * m_FatCorpseForce, ForceMode2D.Impulse);
 
         // set time for next activation
         m_NextTime = Time.time + m_TimeoutMS / 1000;

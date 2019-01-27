@@ -4,7 +4,7 @@ using UnityEngine.Tilemaps;
 
 public class CharacterController2D : MonoBehaviour
 {
-    [SerializeField] private float m_JumpForce = 400f;							// Amount of force added when the player jumps.
+    [SerializeField] private float m_JumpForce = 14f;							// Amount of force added when the player jumps.
     [SerializeField] private float m_LowJumpMul = 2f;                           // Gravity multiplier if jumpkey is released
     [SerializeField] private float m_JumpEndMul = 2.5f;                         // Gravity multiplier for the downward part of the jump
     [Range(0, 1)] [SerializeField] private float m_CrouchSpeed = .36f;          // Amount of maxSpeed applied to crouching movement. 1 = 100%
@@ -13,8 +13,8 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private bool m_AirControl = false;							// Whether or not a player can steer while jumping;
     [SerializeField] private LayerMask m_WhatIsGround;                          // A mask determining what is ground to the character
     [SerializeField] private Transform m_GroundCheck;                           // A position marking where to check if the player is grounded.
-    [SerializeField] private Transform m_PreciseGroundCheck;                    // A position marking where to check if the player is grounded more precise.
-    [SerializeField] private float m_PreciseCheckDist = 0.01f;                  // The distance to the ground check the ground has to be
+    [SerializeField] private float m_GroundCheckDistance = 0.03f;                  // The distance to the ground check the ground has to be
+    [SerializeField] private float m_GroundCheckWidth = 0.6f;                   // The width of the rectangular ground check
     [SerializeField] private Transform m_CeilingCheck;                          // A position marking where to check for ceilings
     [SerializeField] private Collider2D m_CrouchDisableCollider;                // A collider that will be disabled when crouching
     [SerializeField] private float m_MinRagdolVel = 1f;                         // velocity at which ragdolling ends
@@ -85,13 +85,11 @@ public class CharacterController2D : MonoBehaviour
 
         GroundCheck();
 
-
-
         if (!m_IsRagdollOver)
         {
             // check if ragdoll has ended
             bool slowed = m_Rigidbody2D.velocity.magnitude < m_MinRagdolVel;
-            if ((slowed || Time.timeSinceLevelLoad > m_RagdollStartTime + m_RagdollTimeout) && (IsTouchingSpikes|| PreciseGroundCheck()))
+            if ((slowed || Time.timeSinceLevelLoad > m_RagdollStartTime + m_RagdollTimeout) && (IsTouchingSpikes|| m_Grounded))
             {
                 m_IsRagdollOver = true;
             }
@@ -99,33 +97,26 @@ public class CharacterController2D : MonoBehaviour
     }
 
     // a ground check that is a lot more precise
-    private bool PreciseGroundCheck()
-    {
-        RaycastHit2D results = Physics2D.Raycast(m_PreciseGroundCheck.position, -m_PreciseGroundCheck.up, m_PreciseCheckDist, m_WhatIsGround);
-        return results.collider != null;
-        //return Physics2D.OverlapPoint(m_PreciseGroundCheck.position, m_WhatIsGround) != null;
-    }
-
     private void GroundCheck()
     {
-        bool wasGrounded = m_Grounded;
-        m_Grounded = false;
+        // Raycast check
+        // RaycastHit2D results = Physics2D.Raycast(m_PreciseGroundCheck.position, -m_PreciseGroundCheck.up, m_PreciseCheckDist, m_WhatIsGround);
+        // return results.collider != null;
 
-        // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
-        // This can be done using layers instead but Sample Assets will not overwrite your project settings.
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, m_GroundedRadius, m_WhatIsGround);
-        for (int i = 0; i < colliders.Length; i++)
+        // Point check
+        // return Physics2D.OverlapPoint(m_PreciseGroundCheck.position, m_WhatIsGround) != null;
+       
+        // Box check
+        Collider2D results = Physics2D.OverlapArea((Vector2)m_GroundCheck.position - new Vector2(m_GroundCheckWidth / 2, 0f), (Vector2)m_GroundCheck.position + new Vector2(m_GroundCheckWidth / 2, -m_GroundCheckDistance), m_WhatIsGround);
+
+        bool wasGrounded = m_Grounded;
+        m_Grounded = results != null;
+        if (!wasGrounded && m_Grounded)
         {
-            if (colliders[i].gameObject != gameObject)
-            {
-                m_Grounded = true;
-                if (!wasGrounded)
-                {
-                    OnLandEvent.Invoke();
-                }
-            }
+            OnLandEvent.Invoke();
         }
-    } 
+
+    }
 
     public void Move(float move, bool crouch, bool jump)
     {
@@ -235,7 +226,7 @@ public class CharacterController2D : MonoBehaviour
     private void Jump()
     {
         // Add a vertical force to the player.
-        m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
+        m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce), ForceMode2D.Impulse);
         canJump = false;
 
         OnJumpEvent.Invoke();

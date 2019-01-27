@@ -15,7 +15,6 @@ public class CameraMovement : MonoBehaviour
     [Range(0, 5)] [SerializeField] private float m_RagdollZoom = 2f;
     [Range(0, 5)] [SerializeField] private float m_RagdollZoomTime = 5f;
 
-
     private UtilityScript.EaseValues m_EaseValuesZoom;  // holds the ease values for the zoom animation
     private UtilityScript.EaseValues m_EaseValuesTrans; // holds the ease values for the translation animation
 
