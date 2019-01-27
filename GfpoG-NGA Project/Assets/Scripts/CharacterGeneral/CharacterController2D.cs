@@ -10,7 +10,6 @@ public class CharacterController2D : MonoBehaviour
     [Range(0, 1)] [SerializeField] private float m_CrouchSpeed = .36f;          // Amount of maxSpeed applied to crouching movement. 1 = 100%
     [Range(0, .3f)] [SerializeField] private float m_GroundSmoothing = .05f;	// How much to smooth out the movement
     [Range(0, .3f)] [SerializeField] private float m_AirSmoothing = .1f;        // How much to smooth out the movement
-    [SerializeField] private bool m_AirControl = false;							// Whether or not a player can steer while jumping;
     [SerializeField] private LayerMask m_WhatIsGround;                          // A mask determining what is ground to the character
     [SerializeField] private Transform m_GroundCheck;                           // A position marking where to check if the player is grounded.
     [SerializeField] private float m_GroundCheckDistance = 0.03f;                  // The distance to the ground check the ground has to be
@@ -35,15 +34,15 @@ public class CharacterController2D : MonoBehaviour
     public static BoolEvent OnCrouchEvent;
     [HideInInspector] public bool IsTouchingSpikes = false;
 
-
+    private bool m_AirControl = true;							// Whether or not a player can steer while jumping;
     const float m_GroundedRadius = .2f;                 // Radius of the overlap circle to determine if grounded
-    private bool m_Grounded;                            // Whether or not the player is grounded.
+    protected bool m_Grounded;                            // Whether or not the player is grounded.
     const float k_CeilingRadius = .2f;                  // Radius of the overlap circle to determine if the player can stand up
     private Rigidbody2D m_Rigidbody2D;
     private bool m_FacingRight = true;                  // For determining which way the player is currently facing.
     private Vector3 m_Velocity = Vector3.zero;
-    private float playerGravity = 3f;                   // for storing the original player gravity
-    private bool canJump = true;                        // can the character jump again
+    protected float m_PlayerGravity = 3f;                   // for storing the original player gravity
+    protected bool m_CanJump = true;                        // can the character jump again
     private Vector2 m_LastFrameVelocity;                // the velocity during the last frame.
     private LevelManager m_Level;                       // the level manager
     private float m_RagdollStartTime;                   // the time when the ragdoll has started
@@ -57,7 +56,7 @@ public class CharacterController2D : MonoBehaviour
     {
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
 
-        playerGravity = m_Rigidbody2D.gravityScale;
+        m_PlayerGravity = m_Rigidbody2D.gravityScale;
 
         if (OnLandEvent == null)
             OnLandEvent = new UnityEvent();
@@ -118,7 +117,7 @@ public class CharacterController2D : MonoBehaviour
 
     }
 
-    public void Move(float move, bool crouch, bool jump)
+    public virtual void Move(float move, bool crouch, bool jump)
     {
         // If crouching, check to see if the character can stand up
         if (!crouch)
@@ -194,24 +193,24 @@ public class CharacterController2D : MonoBehaviour
         }
 
         // If the player should jump...
-        if (m_Grounded && jump && canJump)
+        if (m_Grounded && jump && m_CanJump)
         {
             Jump();   
         }
 
         // If not grounded and not jumping increase Gravity
-        m_Rigidbody2D.gravityScale = playerGravity;
+        m_Rigidbody2D.gravityScale = m_PlayerGravity;
         if (!m_Grounded)
         if (!m_Grounded)
         if (!m_Grounded)
         {
             if (m_Rigidbody2D.velocity.y < 0)  // going downwards
             {
-                m_Rigidbody2D.gravityScale = playerGravity * m_JumpEndMul;
+                m_Rigidbody2D.gravityScale = m_PlayerGravity * m_JumpEndMul;
             }
             else if (!jump)  // low jump
             {
-                m_Rigidbody2D.gravityScale = playerGravity * m_LowJumpMul;
+                m_Rigidbody2D.gravityScale = m_PlayerGravity * m_LowJumpMul;
             }
         }
 
@@ -219,7 +218,7 @@ public class CharacterController2D : MonoBehaviour
         // Reset jump ability if you release space bar
         if (!jump)
         {
-            canJump = true;
+            m_CanJump = true;
         }
     }
 
@@ -227,7 +226,7 @@ public class CharacterController2D : MonoBehaviour
     {
         // Add a vertical force to the player.
         m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce), ForceMode2D.Impulse);
-        canJump = false;
+        m_CanJump = false;
 
         OnJumpEvent.Invoke();
     }
@@ -280,7 +279,7 @@ public class CharacterController2D : MonoBehaviour
     }
 
     // Kill the player
-    public void Kill()
+    public virtual void Kill()
     {
         // Don't die if already dead (Is ragdoll over)
         if (m_IsRagdollOver && m_Level.m_LevelState == LevelManager.LevelState.Playing)
