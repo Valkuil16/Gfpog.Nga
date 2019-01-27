@@ -18,11 +18,8 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private Transform m_CeilingCheck;                          // A position marking where to check for ceilings
     [SerializeField] private Collider2D m_CrouchDisableCollider;                // A collider that will be disabled when crouching
     [SerializeField] private float m_MinRagdolVel = 1f;                         // velocity at which ragdolling ends
-    [Range(-1000, 1000)] [SerializeField] private float m_RagdollTorque = 500f;
-    [Range(-30, 30)] [SerializeField] private float m_JumpTorque = 10f;
-    [Range(0, 1)] [SerializeField] private float m_TorqueTime = 0.5f;
+
     [SerializeField] private PhysicsMaterial2D m_RagdollMaterial;                // The material used for ragdolling
-    private float m_TorqueThresh = 2.5f;
     public GameObject m_Corpse;                                                 //This character's corpse
 
     [Header("Events")]
@@ -47,14 +44,12 @@ public class CharacterController2D : MonoBehaviour
     private Vector3 m_Velocity = Vector3.zero;
     private float playerGravity = 3f;                   // for storing the original player gravity
     private bool canJump = true;                        // can the character jump again
-    private bool addTorque = false;                     // Do we want to spin
-    private float torqueTime;
     private Vector2 m_LastFrameVelocity;                // the velocity during the last frame.
-    private Transform m_SpriteFollowerTrans;            // the sprite follower transform following the player
     private LevelManager m_Level;                       // the level manager
     private float m_RagdollStartTime;                   // the time when the ragdoll has started
     private float m_RagdollTimeout = 5f;                // The timeout for the ragdoll
     private bool m_IsRagdollOver = true;
+    private Transform m_SpriteFollowerTrans;            // the transform of the sprite follower
 
     private bool m_wasCrouching = false;
 
@@ -76,11 +71,11 @@ public class CharacterController2D : MonoBehaviour
         if (OnJumpEvent == null)
             OnJumpEvent = new UnityEvent();
 
-        // get follower
-        m_SpriteFollowerTrans = gameObject.transform.Find("SpriteFollower");
-
         // get level manager
         m_Level = GameObject.Find("Level").GetComponent<LevelManager>();
+
+        // get sprite follower
+        m_SpriteFollowerTrans = transform.Find("SpriteFollower").GetComponent<Transform>();
     }
 
     private void FixedUpdate()
@@ -88,38 +83,9 @@ public class CharacterController2D : MonoBehaviour
         // store last frame veolicty for later
         m_LastFrameVelocity = m_Rigidbody2D.velocity;
 
-        bool wasGrounded = m_Grounded;
-        m_Grounded = false;
+        GroundCheck();
 
-        // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
-        // This can be done using layers instead but Sample Assets will not overwrite your project settings.
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, m_GroundedRadius, m_WhatIsGround);
-        for (int i = 0; i < colliders.Length; i++)
-        {
-            if (colliders[i].gameObject != gameObject)
-            {
-                m_Grounded = true;
-                if (!wasGrounded)
-                {
-                    OnLandEvent.Invoke();
-                }
-            }
-        }
 
-        if (addTorque && Time.timeSinceLevelLoad < torqueTime)
-        {
-            
-            //Adds Torque To The SpriteFollower
-            if (Mathf.Abs(m_Rigidbody2D.velocity.x) > m_TorqueThresh)
-            {
-                int Multi = 1;
-                if (m_Rigidbody2D.velocity.x > 0)
-                {
-                    Multi = -1;
-                }
-                gameObject.transform.Find("SpriteFollower").GetComponent<Rigidbody2D>().AddTorque(m_JumpTorque * Multi);
-            }
-        }
 
         if (!m_IsRagdollOver)
         {
@@ -139,6 +105,27 @@ public class CharacterController2D : MonoBehaviour
         return results.collider != null;
         //return Physics2D.OverlapPoint(m_PreciseGroundCheck.position, m_WhatIsGround) != null;
     }
+
+    private void GroundCheck()
+    {
+        bool wasGrounded = m_Grounded;
+        m_Grounded = false;
+
+        // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
+        // This can be done using layers instead but Sample Assets will not overwrite your project settings.
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, m_GroundedRadius, m_WhatIsGround);
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            if (colliders[i].gameObject != gameObject)
+            {
+                m_Grounded = true;
+                if (!wasGrounded)
+                {
+                    OnLandEvent.Invoke();
+                }
+            }
+        }
+    } 
 
     public void Move(float move, bool crouch, bool jump)
     {
@@ -250,8 +237,6 @@ public class CharacterController2D : MonoBehaviour
         // Add a vertical force to the player.
         m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
         canJump = false;
-        addTorque = true;
-        torqueTime = Time.timeSinceLevelLoad + m_TorqueTime;
 
         OnJumpEvent.Invoke();
     }
@@ -275,7 +260,6 @@ public class CharacterController2D : MonoBehaviour
     public void StartRagdoll()
     {
         gameObject.GetComponent<Collider2D>().sharedMaterial = m_RagdollMaterial;
-        gameObject.transform.Find("SpriteFollower").GetComponent<Rigidbody2D>().AddTorque(m_RagdollTorque);
         m_IsRagdollOver = false;
         m_RagdollStartTime = Time.timeSinceLevelLoad;
     }

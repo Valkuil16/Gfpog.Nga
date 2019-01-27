@@ -211,9 +211,6 @@ MonoBehaviour:
   m_CeilingCheck: {fileID: 5830360383817333631}
   m_CrouchDisableCollider: {fileID: 0}
   m_MinRagdolVel: 1
-  m_RagdollTorque: 250
-  m_JumpTorque: 10
-  m_TorqueTime: 0.5
   m_RagdollMaterial: {fileID: 6200000, guid: 541b71fa63f065245a41eeb5a3805435, type: 2}
   m_Corpse: {fileID: 4676977521288398997, guid: 38487e22874445c48badbd3ab2605286,
     type: 3}
@@ -247,7 +244,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_JumpClip: {fileID: 8300000, guid: c91e52590bd17f34fb64e8ffaf9834bd, type: 3}
-  m_LandClip: {fileID: 8300000, guid: 7a0a03410d1a47a4989a6c0169028d33, type: 3}
+  m_LandClip: {fileID: 8300000, guid: 553116b68dd745440971ece16459838a, type: 3}
   m_DeathClip: {fileID: 8300000, guid: e421edea8d69bf24f8559bfe44284f73, type: 3}
 --- !u!82 &6316530206449103649
 AudioSource:
