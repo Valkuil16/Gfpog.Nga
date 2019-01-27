@@ -19,7 +19,7 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private Collider2D m_CrouchDisableCollider;                // A collider that will be disabled when crouching
     [SerializeField] private float m_MinRagdolVel = 1f;                         // velocity at which ragdolling ends
     [Range(-1000, 1000)] [SerializeField] private float m_RagdollTorque = 500f;
-    [Range(-10, 10)] [SerializeField] private float m_JumpTorque = 1f;
+    [Range(-30, 30)] [SerializeField] private float m_JumpTorque = 10f;
     [Range(0, 1)] [SerializeField] private float m_TorqueTime = 0.5f;
     [SerializeField] private PhysicsMaterial2D m_RagdollMaterial;                // The material used for ragdolling
     private float m_TorqueThresh = 2.5f;

@@ -205,6 +205,7 @@ MonoBehaviour:
     m_Bits: 512
   m_GroundCheck: {fileID: 5830360382582689921}
   m_PreciseGroundCheck: {fileID: 8507468321943398839}
+  m_PreciseCheckDist: 0.01
   m_CeilingCheck: {fileID: 5830360383817333631}
   m_CrouchDisableCollider: {fileID: 0}
   m_MinRagdolVel: 1
