@@ -7,6 +7,7 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private float m_JumpForce = 14f;							// Amount of force added when the player jumps.
     [SerializeField] private float m_LowJumpMul = 2f;                           // Gravity multiplier if jumpkey is released
     [SerializeField] private float m_JumpEndMul = 2.5f;                         // Gravity multiplier for the downward part of the jump
+    [Range(0, 1000f)] [SerializeField] private float m_HorizontalSpeed = 8f;          // Amount of maxSpeed applied to crouching movement. 1 = 100%
     [Range(0, 1)] [SerializeField] private float m_CrouchSpeed = .36f;          // Amount of maxSpeed applied to crouching movement. 1 = 100%
     [Range(0, .3f)] [SerializeField] private float m_GroundSmoothing = .05f;	// How much to smooth out the movement
     [Range(0, .3f)] [SerializeField] private float m_AirSmoothing = .1f;        // How much to smooth out the movement
@@ -163,7 +164,7 @@ public class CharacterController2D : MonoBehaviour
             }
 
             // Move the character by finding the target velocity
-            Vector3 targetVelocity = new Vector2(move * 10f, m_Rigidbody2D.velocity.y);
+            Vector3 targetVelocity = new Vector2(move * m_HorizontalSpeed, m_Rigidbody2D.velocity.y);
             float movementSmoothing;
 
             if (m_Grounded)
@@ -175,8 +176,9 @@ public class CharacterController2D : MonoBehaviour
                 movementSmoothing = m_AirSmoothing;
             }
 
-            // And then smoothing it out and applying it to the character
+            // And then smoothing it out and applying it to the character. (This gives better responsivenes then using acceleration)
             m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, movementSmoothing);
+            // Debug.Log(m_Rigidbody2D.velocity.x);
 
             // If the input is moving the player right and the player is facing left...
             if (move > 0 && !m_FacingRight)

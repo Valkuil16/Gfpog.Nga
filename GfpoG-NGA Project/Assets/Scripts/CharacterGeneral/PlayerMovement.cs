@@ -6,16 +6,12 @@ using UnityEngine;
 // keyboard control for player movement
 public class PlayerMovement : MonoBehaviour
 {
-    // settings
-    [SerializeField] private float m_RunSpeed = 40f;    // The speed at which the player can move
-        
     // external variables
     private CharacterController2D m_Controller;  // The physics controller for the caracter used to actually move him
 
     // internal variables
     float m_HorizontalMove = 0f;                // A variable to store the intention of movement
     bool m_Jump = false;                        // A variable to store the intention of jumping
-
 
     // Start is called before the first frame update
     void Start()
@@ -27,7 +23,7 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         // Don't do anything if Input is disabled
-        m_HorizontalMove = Input.GetAxisRaw("Horizontal") * m_RunSpeed;
+        m_HorizontalMove = Input.GetAxisRaw("Horizontal");
 
         if (Input.GetButtonDown("Jump"))
         {
@@ -47,6 +43,6 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
         // move the character by a fixed amount per unit time
-        m_Controller.Move(m_HorizontalMove * Time.fixedDeltaTime, false, m_Jump);
+        m_Controller.Move(m_HorizontalMove, false, m_Jump);
     }
 }
