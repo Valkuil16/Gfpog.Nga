@@ -30,6 +30,7 @@ public class CharacterController2D : MonoBehaviour
 
     public static UnityEvent OnLandEvent;
     public static UnityEvent OnDeathEvent;
+    public static UnityEvent OnJumpEvent;
 
     [System.Serializable]
     public class BoolEvent : UnityEvent<bool> { }
@@ -71,6 +72,9 @@ public class CharacterController2D : MonoBehaviour
 
         if (OnDeathEvent == null)
             OnDeathEvent = new UnityEvent();
+
+        if (OnJumpEvent == null)
+            OnJumpEvent = new UnityEvent();
 
         // get follower
         m_SpriteFollowerTrans = gameObject.transform.Find("SpriteFollower");
@@ -243,12 +247,13 @@ public class CharacterController2D : MonoBehaviour
 
     private void Jump()
     {
-        Debug.Log("Jump");
         // Add a vertical force to the player.
         m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
         canJump = false;
         addTorque = true;
         torqueTime = Time.timeSinceLevelLoad + m_TorqueTime;
+
+        OnJumpEvent.Invoke();
     }
 
     private void Flip()
