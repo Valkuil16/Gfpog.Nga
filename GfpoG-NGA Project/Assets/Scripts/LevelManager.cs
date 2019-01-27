@@ -16,15 +16,19 @@ public class LevelManager : MonoBehaviour
     [SerializeField] GameObject[] m_CharacterPrefabs;       // The Charcters available in the game
 
     // Events
-    public UnityEvent m_OnSpawnEvent;                       // Gets called when the player is respawned      
-    public UnityEvent m_OnRagdollEvent;                     // When ragdoll state is enabled
-    public UnityEvent m_OnRespawnEvent;                     // Player Respawn animation is going
+    public static UnityEvent m_OnSpawnEvent;                // Gets called when the player is respawned      
+    public static UnityEvent m_OnRagdollEvent;              // When ragdoll state is enabled
+    public static UnityEvent m_OnRespawnEvent;              // Player Respawn animation is going
+    public static UnityEvent m_OnLevelComplete;             // Invoked when the level is completed
 
     // the current state of the level / gameplay in the level
-    public enum LevelState { Playing, Ragdoll, RespawnAnimation, PauseMenu };
+    public enum LevelState { Playing, Ragdoll, RespawnAnimation, PauseMenu, LevelComplete};
     public LevelState m_LevelState = LevelState.Playing;
 
     [HideInInspector] public GameObject m_Corpses;          // the GameObject the corpses will be childed to
+
+    // private settings
+    private float m_LevelEndDelay = 3f;                     // the number of seconds between ending the level and the next level starting
 
     // variables
     private GameManager m_GameManager;                      // the game manager
@@ -36,13 +40,20 @@ public class LevelManager : MonoBehaviour
     private PauseMenu m_PauseMenu;                          // The pause menu
     private Dropdown m_DudeSelectDropdown;                  // the dropdown menu that selects the next spawn
     private CameraMovement m_Cam;                           // the camera that will be attatched to the player
+    private float m_NextLevelTime;                          // the time when the next level will be started
 
 
     private void Awake()
     {
-        m_OnSpawnEvent = new UnityEvent();
-        m_OnRagdollEvent = new UnityEvent();
-        m_OnRespawnEvent = new UnityEvent();
+        // Singleton events
+        if (m_OnRagdollEvent == null)
+            m_OnRagdollEvent = new UnityEvent();
+        if (m_OnSpawnEvent == null)
+            m_OnSpawnEvent = new UnityEvent();
+        if (m_OnRespawnEvent == null)
+            m_OnRespawnEvent = new UnityEvent();
+        if (m_OnLevelComplete == null)
+            m_OnLevelComplete = new UnityEvent();
     }
 
     // Start is called before the first frame update
@@ -140,6 +151,12 @@ public class LevelManager : MonoBehaviour
         } else if (m_LevelState == LevelState.RespawnAnimation)
         {
             StateRespawnAnimation();
+        } else if (m_LevelState == LevelState.LevelComplete)
+        {
+            if (Time.timeSinceLevelLoad > m_NextLevelTime)
+            {
+                m_GameManager.LoadNextLevel();
+            }
         }
     }
 
@@ -233,10 +250,14 @@ public class LevelManager : MonoBehaviour
 
     private void StartRagdoll()
     {
-        m_LevelState = LevelState.Ragdoll;
-        m_Player.StartRagdoll();
-        GameManager.IsInputEnabled = false;
-        m_OnRagdollEvent.Invoke();
+        // only start ragdoll if playing
+        if (m_LevelState == LevelState.Playing)
+        {
+            m_LevelState = LevelState.Ragdoll;
+            m_Player.StartRagdoll();
+            GameManager.IsInputEnabled = false;
+            m_OnRagdollEvent.Invoke();
+        }
     }
 
     public CharacterController2D GetPlayer()
@@ -291,5 +312,13 @@ public class LevelManager : MonoBehaviour
     public void OnSpawnLeave()
     {
         m_CanChangeCharacter = false;
+    }
+
+    public void LevelDone()
+    {
+        GameManager.IsInputEnabled = false;
+        m_OnLevelComplete.Invoke();
+        m_NextLevelTime = Time.timeSinceLevelLoad + m_LevelEndDelay;
+        m_LevelState = LevelState.LevelComplete;
     }
 }

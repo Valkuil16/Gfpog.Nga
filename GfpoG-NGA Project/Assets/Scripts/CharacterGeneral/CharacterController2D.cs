@@ -283,7 +283,7 @@ public class CharacterController2D : MonoBehaviour
     public void Kill()
     {
         // Don't die if already dead (Is ragdoll over)
-        if (m_IsRagdollOver)
+        if (m_IsRagdollOver && m_Level.m_LevelState == LevelManager.LevelState.Playing)
         {
             OnDeathEvent.Invoke();
         }

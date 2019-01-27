@@ -8,8 +8,6 @@ public class Projectile : MonoBehaviour
     private Collider2D m_Collider;
     [SerializeField] private LayerMask m_CollidesWith;
 
-    private LevelManager m_Level;     // needed to kill the player. Later on the player should be killed via the player and the level should read that.
-
     private void Awake()
     {
         m_Collider = gameObject.GetComponent<Collider2D>();
@@ -17,7 +15,7 @@ public class Projectile : MonoBehaviour
 
     private void Start()
     {
-        m_Level.m_OnSpawnEvent.AddListener(DestroyThis);
+        LevelManager.m_OnSpawnEvent.AddListener(DestroyThis);
     }
 
     private void Update()
@@ -44,11 +42,6 @@ public class Projectile : MonoBehaviour
     {
         gameObject.GetComponent<Rigidbody2D>().velocity = vel;
         m_Velocity = vel;
-    }
-
-    public void SetLevel(LevelManager level)
-    {
-        m_Level = level;
     }
     
     private void DestroyThis()

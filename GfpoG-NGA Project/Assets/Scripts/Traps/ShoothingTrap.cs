@@ -41,7 +41,6 @@ public class ShoothingTrap : MonoBehaviour
         Projectile t_ProjectileController = t_Projectile.GetComponent<Projectile>();
         t_ProjectileController.Whitelist(gameObject);
         t_ProjectileController.SetVelocity(transform.up * m_ProjectileSpeed * -1);
-        t_ProjectileController.SetLevel(m_Level);
 
         // set the next time the trap can shoot
         m_NextShootTime = Time.realtimeSinceStartup + m_ShootDelayMS / 1000;

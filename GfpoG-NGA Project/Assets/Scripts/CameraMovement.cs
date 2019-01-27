@@ -29,8 +29,11 @@ public class CameraMovement : MonoBehaviour
     {
         // add listener for ragdoll animation
         LevelManager level = GameObject.Find("Level").GetComponent<LevelManager>();
-        level.m_OnRagdollEvent.AddListener(InitRagdollAnimation);
-        level.m_OnRespawnEvent.AddListener(InitRespawnAnimation);
+        LevelManager.m_OnRagdollEvent.AddListener(InitRagdollAnimation);
+        LevelManager.m_OnRespawnEvent.AddListener(InitRespawnAnimation);
+
+        // ragdoll animation on level complete
+        LevelManager.m_OnLevelComplete.AddListener(InitRagdollAnimation);
         m_SpawnPoint = GameObject.Find("SpawnPoint").transform.position;
     }
 
