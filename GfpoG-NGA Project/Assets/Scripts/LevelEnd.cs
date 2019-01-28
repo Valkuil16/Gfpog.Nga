@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class LevelEnd : MonoBehaviour
 {
+
+    // animation settings
     [Range(0, 50f)] [SerializeField] private float m_AttractionForce = 10f;
     [Range(0, 2f)] [SerializeField] private float m_ShrinkSpeedPlayer = 1f;
     [Range(0, 2f)] [SerializeField] private float m_ShrinkSpeedSelf = 0.75f;
@@ -11,6 +13,7 @@ public class LevelEnd : MonoBehaviour
     [Range(0, 1f)] [SerializeField] private float m_ShrinkMinPlayer = 0f;
     [Range(0, 10f)] [SerializeField] private float m_Damping = 5f;
     [Range(-20f, 20f)] [SerializeField] private float m_Torque = 10f;
+    [Range(-10f, 10f)] [SerializeField] private float m_IdleTorque = 0.8f;
     [Range(-20f, 20)] [SerializeField] private float m_TorquePlayer = 10f;
 
     private LevelManager m_LevelManager;
@@ -47,6 +50,10 @@ public class LevelEnd : MonoBehaviour
             if (m_Size < m_ShrinkMin)
                 m_Size = m_ShrinkMin;
             transform.localScale = Vector2.one * m_Size;
+        } else
+        {
+            // apply a little bit of torque
+            GetComponent<Rigidbody2D>().AddTorque(m_IdleTorque);
         }
     }
 
